@@ -47,6 +47,10 @@ public class NamesrvStartup {
     private static Properties properties = null;
     private static CommandLine commandLine = null;
 
+    /**
+     * NamerServer的启动流程
+     * @param args
+     */
     public static void main(String[] args) {
         main0(args);
     }
@@ -54,13 +58,17 @@ public class NamesrvStartup {
     public static NamesrvController main0(String[] args) {
 
         try {
+            // 创建NamesrvController控制器
             NamesrvController controller = createNamesrvController(args);
+            //启动  nameServer
             start(controller);
+            //启动成功输出下面的日志信息
             String tip = "The Name Server boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();
             log.info(tip);
             System.out.printf("%s%n", tip);
             return controller;
         } catch (Throwable e) {
+            // 发生异常时 退出
             e.printStackTrace();
             System.exit(-1);
         }
@@ -73,15 +81,21 @@ public class NamesrvStartup {
         //PackageConflictDetect.detectFastjson();
 
         Options options = ServerUtil.buildCommandlineOptions(new Options());
+        //  获取启动命令参数
         commandLine = ServerUtil.parseCmdLine("mqnamesrv", args, buildCommandlineOptions(options), new PosixParser());
         if (null == commandLine) {
             System.exit(-1);
             return null;
         }
 
+        //创建NamesrvConfig  namerserver的配置信息管理
         final NamesrvConfig namesrvConfig = new NamesrvConfig();
+        //创建NettyServerConfig  一个netty的服务的配置信息
         final NettyServerConfig nettyServerConfig = new NettyServerConfig();
+        //设置默认的监听端口
         nettyServerConfig.setListenPort(9876);
+
+        // 判断是
         if (commandLine.hasOption('c')) {
             String file = commandLine.getOptionValue('c');
             if (file != null) {
